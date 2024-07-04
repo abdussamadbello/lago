@@ -34,7 +34,7 @@ services:
 
   api:
     container_name: lago-api
-    image: getlago/api:v1.8.2
+    image: abdussamadbello/lago-api
     restart: unless-stopped
     depends_on:
       - db
@@ -131,7 +131,7 @@ services:
 
   api-worker:
     container_name: lago-worker
-    image: getlago/api:v1.8.2
+    image: abdussamadbello/lago-api
     restart: unless-stopped
     depends_on:
       api:
@@ -179,7 +179,7 @@ services:
   # It is recommendend if you have a high usage of events to not impact the other Sidekiq Jobs.
   #api-events-worker:
   #  container_name: lago-events-worker
-  #  image: getlago/api:v1.8.2
+  #  image: abdussamadbello/lago-api
   #  restart: unless-stopped
   #  depends_on:
   #    api:
@@ -222,7 +222,7 @@ services:
   # It is recommended if you have a high usage of invoices being created to not impact the other Sidekiq Jobs.
   #api-pdfs-worker:
   #  container_name: lago-pdfs-worker
-  #  image: getlago/api:v1.8.2
+  #  image: abdussamadbello/lago-api
   #  restart: unless-stopped
   #  depends_on:
   #    api:
@@ -263,7 +263,7 @@ services:
 
   api-clock:
     container_name: lago-clock
-    image: getlago/api:v1.8.2
+    image: abdussamadbello/lago-api
     restart: unless-stopped
     depends_on:
       api:
