@@ -34,7 +34,7 @@ services:
 
   api:
     container_name: lago-api
-    image: abdussamadbello/lago-api
+    image: abdussamadbello/lago-api:1.2
     restart: unless-stopped
     # depends_on:
     #   - db
@@ -104,7 +104,7 @@ services:
 
   front:
     container_name: lago-front
-    image: getlago/front:v1.6.0
+    image: getlago/front:v1.8.2
     restart: unless-stopped
     # Use this command if you want to use SSL with Let's Encrypt
     # command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
@@ -152,7 +152,7 @@ services:
 
   api-worker:
     container_name: lago-worker
-    image: abdussamadbello/lago-api
+    image: abdussamadbello/lago-api:1.2
     restart: unless-stopped
     depends_on:
       api:
@@ -184,7 +184,7 @@ services:
       - LAGO_USE_GCS=${LAGO_USE_GCS:-false}
       - LAGO_GCS_PROJECT=${LAGO_GCS_PROJECT:-}
       - LAGO_GCS_BUCKET=${LAGO_GCS_BUCKET:-}
-      - LAGO_PDF_URL=${LAGO_PDF_URL_HOST:-http://pdf:3000}
+      - LAGO_PDF_URL=${LAGO_PDF_URL:-http://pdf:3000}
       - LAGO_REDIS_CACHE_URL=redis://${LAGO_REDIS_CACHE_HOST:-redis}:${LAGO_REDIS_CACHE_PORT:-6379}
       - LAGO_REDIS_CACHE_PASSWORD=${LAGO_REDIS_CACHE_PASSWORD}
       - LAGO_DISABLE_SEGMENT=${LAGO_DISABLE_SEGMENT}
@@ -201,7 +201,7 @@ services:
   # It is recommendend if you have a high usage of events to not impact the other Sidekiq Jobs.
   #api-events-worker:
   #  container_name: lago-events-worker
-  #  image: abdussamadbello/lago-api
+  #  image: abdussamadbello/lago-api:1.2
   #  restart: unless-stopped
   #  depends_on:
   #    api:
@@ -231,7 +231,7 @@ services:
   #    - LAGO_USE_GCS=${LAGO_USE_GCS:-false}
   #    - LAGO_GCS_PROJECT=${LAGO_GCS_PROJECT:-}
   #    - LAGO_GCS_BUCKET=${LAGO_GCS_BUCKET:-}
-  #    - LAGO_PDF_URL=${LAGO_PDF_URL_HOST:-http://pdf:3000}
+  #    - LAGO_PDF_URL=${LAGO_PDF_URL:-http://pdf:3000}
   #    - LAGO_REDIS_CACHE_URL=redis://${LAGO_REDIS_CACHE_HOST:-redis}:${LAGO_REDIS_CACHE_PORT:-6379}
   #    - LAGO_REDIS_CACHE_PASSWORD=${LAGO_REDIS_CACHE_PASSWORD}
   #    - LAGO_DISABLE_SEGMENT=${LAGO_DISABLE_SEGMENT}
@@ -245,7 +245,7 @@ services:
   # It is recommended if you have a high usage of invoices being created to not impact the other Sidekiq Jobs.
   #api-pdfs-worker:
   #  container_name: lago-pdfs-worker
-  #  image: abdussamadbello/lago-api
+  #  image: abdussamadbello/lago-api:1.2
   #  restart: unless-stopped
   #  depends_on:
   #    api:
@@ -275,7 +275,7 @@ services:
   #    - LAGO_USE_GCS=${LAGO_USE_GCS:-false}
   #    - LAGO_GCS_PROJECT=${LAGO_GCS_PROJECT:-}
   #    - LAGO_GCS_BUCKET=${LAGO_GCS_BUCKET:-}
-  #    - LAGO_PDF_URL=${LAGO_PDF_URL_HOST:-http://pdf:3000}
+  #    - LAGO_PDF_URL=${LAGO_PDF_URL:-http://pdf:3000}
   #    - LAGO_REDIS_CACHE_URL=redis://${LAGO_REDIS_CACHE_HOST:-redis}:${LAGO_REDIS_CACHE_PORT:-6379}
   #    - LAGO_REDIS_CACHE_PASSWORD=${LAGO_REDIS_CACHE_PASSWORD}
   #    - LAGO_DISABLE_SEGMENT=${LAGO_DISABLE_SEGMENT}
@@ -287,7 +287,7 @@ services:
 
   api-clock:
     container_name: lago-clock
-    image: abdussamadbello/lago-api
+    image: abdussamadbello/lago-api:1.2
     restart: unless-stopped
     depends_on:
       api:
@@ -315,13 +315,23 @@ services:
     
   
   pdf:
+    container_name: lago-pdf
     image: getlago/lago-gotenberg:7.8.2
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${PDF_UNIQUE_NAME}.entrypoints=web"
-      - "traefik.http.routers.${API_UNIQUE_NAME}.entrypoints=websecure"
+      - "traefik.http.routers.${PDF_UNIQUE_NAME}.entrypoints=web,websecure"
       - "traefik.http.routers.${PDF_UNIQUE_NAME}.rule=Host(`${LAGO_PDF_URL_HOST}`)"
       - "traefik.http.services.${PDF_UNIQUE_NAME}.loadbalancer.server.port=3000"
+      
+      # - "traefik.http.routers.${PDF_UNIQUE_NAME}.service=${PDF_UNIQUE_NAME}"
+      # - "traefik.http.routers.${PDF_UNIQUE_NAME}-http.entrypoints=web"
+      # - "traefik.http.routers.${PDF_UNIQUE_NAME}-http.rule=Host(`${LAGO_PDF_URL_HOST}`)"
+      # - "traefik.http.routers.${PDF_UNIQUE_NAME}-http.service=${PDF_UNIQUE_NAME}-http"
+      # - "traefik.http.services.${PDF_UNIQUE_NAME}-http.loadbalancer.server.port=3000"
+    ports:
+      - ${PDF_PORT:-3112}:3000
+    networks:
+      - dokploy-network
 
 networks:
   dokploy-network:
